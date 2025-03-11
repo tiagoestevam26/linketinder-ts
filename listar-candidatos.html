@@ -6,6 +6,8 @@
     <title>Lista de Candidatos</title>
     <script type="module" src="./dist/script.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
+    
 
 </head>
 <body>
@@ -14,16 +16,15 @@
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Email</th>
-                <th>CPF</th>
-                <th>Idade</th>
                 <th>Estado</th>
-                <th>CEP</th>
-                <th>Descrição</th>
                 <th>Competências</th>
             </tr>
         </thead>
         <tbody id="candidatos-list"></tbody>
     </table>
+
+    <canvas id="myChart"></canvas>
+    <div id="script-container"></div>
+
 </body>
 </html>

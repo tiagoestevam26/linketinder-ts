@@ -1,11 +1,9 @@
-/* Reset básico para remover margens e paddings padrão */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Estilo global do corpo */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f4f9;
@@ -14,7 +12,10 @@ body {
     padding: 20px;
 }
 
-/* Estilo para os títulos */
+.submit {
+    background-color: rgb(27, 187, 49);
+}
+
 h1 {
     font-size: 2.5rem;
     color: #2c3e50;
@@ -22,7 +23,6 @@ h1 {
     text-align: center;
 }
 
-/* Estilo para a lista de menu */
 ul {
     list-style-type: none;
     padding: 0;
@@ -56,7 +56,6 @@ ul li a:hover {
     color: #2980b9;
 }
 
-/* Estilo para tabelas */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -81,7 +80,6 @@ table tr:hover {
     background-color: #f1f1f1;
 }
 
-/* Estilo para formulários */
 form {
     max-width: 600px;
     margin: 0 auto;
@@ -126,13 +124,13 @@ form button {
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
 form button:hover {
     background-color: #2980b9;
 }
 
-/* Estilo para links de voltar ao menu */
 a {
     display: inline-block;
     margin-top: 20px;

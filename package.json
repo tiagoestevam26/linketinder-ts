@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@types/echarts": "^5.0.0",
+    "chart.js": "^4.4.8"
+  }
 }

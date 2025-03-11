@@ -1,19 +1,27 @@
-// Importando os módulos corretamente
 import { Business } from "./models.js";
 import { Candidate } from "./models.js";
 import { businessManager } from "./managers.js";
 import { candidateManager } from "./managers.js";
 
+
+// Definir chartData no window
+declare global {
+    interface Window {
+        chartData: { labels: string[]; data: number[] };
+    }
+}
+
+window.chartData = window.chartData || { labels: [], data: [] };
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Script carregado com sucesso!");
-    
+
     const empresaForm = document.getElementById("empresa-form") as HTMLFormElement;
     const candidatoForm = document.getElementById("candidato-form") as HTMLFormElement;
 
     let empresaCompetencias: string[] = [];
     let candidatoCompetencias: string[] = [];
 
-    // Configurar a funcionalidade de adicionar competências
     setupCompetenceInput("empresa-form", "competence-business", "business-competences-list", empresaCompetencias);
     setupCompetenceInput("candidato-form", "competence-candidate", "candidate-competences-list", candidatoCompetencias);
 
@@ -29,13 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const description = (document.getElementById("description") as HTMLInputElement).value;
 
             const empresa = new Business(name, email, cnpj, country, state, cep, description);
-            empresa.waitedCompetences = empresaCompetencias; // Salvar competências
+            empresa.waitedCompetences = empresaCompetencias; 
 
             businessManager.addBusiness(empresa);
             alert("Empresa cadastrada com sucesso!");
             empresaForm.reset();
-            empresaCompetencias = []; // Resetar array de competências
-            document.getElementById("competences-list")!.innerHTML = ""; // Limpar lista visual
+            empresaCompetencias = []; 
+            document.getElementById("competences-list")!.innerHTML = ""; 
         });
     }
 
@@ -51,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const description = (document.getElementById("description") as HTMLInputElement).value;
 
             const candidato = new Candidate(name, email, state, cep, description, cpf, age);
-            candidato.competences = candidatoCompetencias; // Salvar competências
+            candidato.competences = candidatoCompetencias; 
             console.log(candidatoCompetencias);
 
 
@@ -59,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Candidato cadastrado:", candidato);
             alert("Candidato cadastrado com sucesso!");
             candidatoForm.reset();
-            candidatoCompetencias = []; // Resetar array de competências
-            document.getElementById("competences-list")!.innerHTML = ""; // Limpar lista visual
+            candidatoCompetencias = []; 
+            document.getElementById("competences-list")!.innerHTML = ""; 
         });
     }
 
@@ -68,50 +76,48 @@ document.addEventListener("DOMContentLoaded", () => {
     const candidatesList = document.getElementById("candidatos-list");
 
     if (businessList) {
-        businessList.innerHTML = ""; // Limpar lista antes de recarregar
+        businessList.innerHTML = ""; 
 
-    businessManager.listBusinesses().forEach(business => {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${business.name}</td>
-            <td>${business.email}</td>
-            <td>${business.CNPJ}</td>
+        businessManager.listBusinesses().forEach(business => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${business.name}</td>                       
             <td>${business.country}</td>
-            <td>${business.state}</td>
-            <td>${business.cep}</td>
-            <td>${business.description}</td>
+            <td>${business.state}</td>      
             <td>${business.waitedCompetences.join(", ") || "Nenhuma"}</td> 
         `;
 
-        businessList.appendChild(row);
-    });
+            businessList.appendChild(row);
+        });
     }
 
     if (candidatesList) {
-        candidatesList.innerHTML = ""; // Limpar lista antes de recarregar
+        candidatesList.innerHTML = ""; 
+
 
         candidateManager.listCandidates().forEach(candidate => {
             const row = document.createElement("tr");
-    
             row.innerHTML = `
                 <td>${candidate.name}</td>
-                <td>${candidate.email}</td>
-                <td>${candidate.CPF}</td>
-                <td>${candidate.age}</td>
                 <td>${candidate.state}</td>
-                <td>${candidate.cep}</td>
-                <td>${candidate.description}</td>
                 <td>${candidate.competences.join(", ") || "Nenhuma"}</td> 
             `;
-    
+
             candidatesList.appendChild(row);
+
+
         });
+
+        atualizarGraficoCompetencias(candidateManager.listCandidates());
+
     }
+
+
+
+
 });
 
 
-// Função para adicionar competências dinamicamente
 function setupCompetenceInput(formId: string, inputId: string, listId: string, storageArray: string[]) {
     const competenceInput = document.getElementById(inputId) as HTMLInputElement;
     const addCompetenceButton = document.getElementById(`add-${inputId}`) as HTMLButtonElement;
@@ -129,7 +135,62 @@ function setupCompetenceInput(formId: string, inputId: string, listId: string, s
             }
         });
     }
+};
+
+
+function contarCompetencias(candidatos: Candidate[]): { [key: string]: number } {
+    const contagem: { [key: string]: number } = {};
+
+    candidatos.forEach(candidate => {
+        candidate.competences.forEach(competencia => {
+            contagem[competencia] = (contagem[competencia] || 0) + 1;
+        });
+    });
+
+    return contagem;
 }
 
+function atualizarGraficoCompetencias(candidatos: Candidate[]) {
+    const competenciasCount = contarCompetencias(candidatos);
 
-;
+    window.chartData = {
+        labels: Object.keys(competenciasCount),
+        data: Object.values(competenciasCount)
+    };
+
+    console.log("Atualizando gráfico com:", window.chartData);
+
+    const scriptContainer = document.getElementById("script-container");
+    if (scriptContainer) {
+        scriptContainer.innerHTML = ""; 
+
+        const chartJsScript = document.createElement("script");
+        chartJsScript.src = "https://cdn.jsdelivr.net/npm/chart.js";
+        chartJsScript.onload = () => {
+            const scriptTag = document.createElement("script");
+            scriptTag.textContent = `
+                var ctx = document.getElementById("myChart").getContext("2d");
+                var myChart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: ${JSON.stringify(window.chartData.labels)},
+                        datasets: [{
+                            label: "Número de Candidatos por Competência",
+                            data: ${JSON.stringify(window.chartData.data)},
+                            backgroundColor: "rgba(54, 162, 235, 0.5)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            `;
+            scriptContainer.appendChild(scriptTag);
+        };
+
+        scriptContainer.appendChild(chartJsScript);
+    }
+}

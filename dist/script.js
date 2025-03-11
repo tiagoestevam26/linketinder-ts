@@ -3,6 +3,7 @@ import { Business } from "./models.js";
 import { Candidate } from "./models.js";
 import { businessManager } from "./managers.js";
 import { candidateManager } from "./managers.js";
+window.chartData = window.chartData || { labels: [], data: [] };
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Script carregado com sucesso!");
     const empresaForm = document.getElementById("empresa-form");
@@ -58,14 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
         businessList.innerHTML = ""; // Limpar lista antes de recarregar
         businessManager.listBusinesses().forEach(business => {
             const row = document.createElement("tr");
+            /**
+                <td>${business.email}</td>
+                <td>${business.CNPJ}</td>
+                <td>${business.cep}</td>
+                <td>${business.description}</td>
+             */
             row.innerHTML = `
-            <td>${business.name}</td>
-            <td>${business.email}</td>
-            <td>${business.CNPJ}</td>
+            <td>${business.name}</td>                       
             <td>${business.country}</td>
-            <td>${business.state}</td>
-            <td>${business.cep}</td>
-            <td>${business.description}</td>
+            <td>${business.state}</td>      
             <td>${business.waitedCompetences.join(", ") || "Nenhuma"}</td> 
         `;
             businessList.appendChild(row);
@@ -75,18 +78,22 @@ document.addEventListener("DOMContentLoaded", () => {
         candidatesList.innerHTML = ""; // Limpar lista antes de recarregar
         candidateManager.listCandidates().forEach(candidate => {
             const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${candidate.name}</td>
+            /**
                 <td>${candidate.email}</td>
                 <td>${candidate.CPF}</td>
                 <td>${candidate.age}</td>
-                <td>${candidate.state}</td>
                 <td>${candidate.cep}</td>
-                <td>${candidate.description}</td>
+                <td>${candidate.description }</td>
+    
+             */
+            row.innerHTML = `
+                <td>${candidate.name}</td>
+                <td>${candidate.state}</td>
                 <td>${candidate.competences.join(", ") || "Nenhuma"}</td> 
             `;
             candidatesList.appendChild(row);
         });
+        atualizarGraficoCompetencias(candidateManager.listCandidates());
     }
 });
 // Função para adicionar competências dinamicamente
@@ -108,4 +115,53 @@ function setupCompetenceInput(formId, inputId, listId, storageArray) {
     }
 }
 ;
+function contarCompetencias(candidatos) {
+    const contagem = {};
+    candidatos.forEach(candidate => {
+        candidate.competences.forEach(competencia => {
+            contagem[competencia] = (contagem[competencia] || 0) + 1;
+        });
+    });
+    return contagem;
+}
+function atualizarGraficoCompetencias(candidatos) {
+    const competenciasCount = contarCompetencias(candidatos);
+    window.chartData = {
+        labels: Object.keys(competenciasCount),
+        data: Object.values(competenciasCount)
+    };
+    console.log("Atualizando gráfico com:", window.chartData);
+    const scriptContainer = document.getElementById("script-container");
+    if (scriptContainer) {
+        scriptContainer.innerHTML = ""; // Limpa scripts antigos
+        // Adiciona o script da biblioteca Chart.js
+        const chartJsScript = document.createElement("script");
+        chartJsScript.src = "https://cdn.jsdelivr.net/npm/chart.js";
+        chartJsScript.onload = () => {
+            const scriptTag = document.createElement("script");
+            scriptTag.textContent = `
+                var ctx = document.getElementById("myChart").getContext("2d");
+                var myChart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: ${JSON.stringify(window.chartData.labels)},
+                        datasets: [{
+                            label: "Número de Candidatos por Competência",
+                            data: ${JSON.stringify(window.chartData.data)},
+                            backgroundColor: "rgba(54, 162, 235, 0.5)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            `;
+            scriptContainer.appendChild(scriptTag);
+        };
+        scriptContainer.appendChild(chartJsScript);
+    }
+}
 //# sourceMappingURL=script.js.map
