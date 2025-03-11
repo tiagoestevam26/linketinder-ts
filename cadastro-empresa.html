@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Empresa</title>
+    <script type="module" src="./dist/script.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+
+</head>
+
+<body>
+    <h1>Cadastro de Empresa</h1>
+    <!-- Formulário de cadastro da empresa -->
+    <form id="empresa-form">
+        <!-- Campos de cadastro de empresa -->
+        <label for="name">Nome da Empresa:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="cnpj">CNPJ:</label>
+        <input type="text" id="cnpj" name="cnpj" required><br><br>
+
+        <label for="country">País:</label>
+        <input type="text" id="country" name="country" required><br><br>
+
+        <label for="state">Estado:</label>
+        <input type="text" id="state" name="state" required><br><br>
+
+        <label for="cep">CEP:</label>
+        <input type="text" id="cep" name="cep" required><br><br>
+
+        <label for="description">Descrição:</label>
+        <textarea id="description" name="description" required></textarea><br><br>
+
+        <label for="competence">Competência:</label>
+        <input type="text" id="competence-business" name="competence">
+        <button type="button" id="add-competence-business">Adicionar Competência</button>
+
+        <ul id="business-competences-list"></ul>
+
+        <button type="submit">Cadastrar Empresa</button>
+    </form>
+
+    <br>
+    <a href="index.html">Voltar ao Menu</a>
+</body>
+
+</html>
