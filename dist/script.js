@@ -1,4 +1,3 @@
-// Importando os módulos corretamente
 import { Business } from "./models.js";
 import { Candidate } from "./models.js";
 import { businessManager } from "./managers.js";
@@ -10,61 +9,110 @@ document.addEventListener("DOMContentLoaded", () => {
     const candidatoForm = document.getElementById("candidato-form");
     let empresaCompetencias = [];
     let candidatoCompetencias = [];
-    // Configurar a funcionalidade de adicionar competências
     setupCompetenceInput("empresa-form", "competence-business", "business-competences-list", empresaCompetencias);
     setupCompetenceInput("candidato-form", "competence-candidate", "candidate-competences-list", candidatoCompetencias);
     if (empresaForm) {
         empresaForm.addEventListener("submit", (event) => {
             event.preventDefault();
-            const name = document.getElementById("name").value;
-            const email = document.getElementById("email").value;
-            const cnpj = document.getElementById("cnpj").value;
-            const country = document.getElementById("country").value;
-            const state = document.getElementById("state").value;
-            const cep = document.getElementById("cep").value;
-            const description = document.getElementById("description").value;
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const cnpj = document.getElementById("cnpj").value.trim();
+            const country = document.getElementById("country").value.trim();
+            const state = document.getElementById("state").value.trim();
+            const cep = document.getElementById("cep").value.trim();
+            const description = document.getElementById("description").value.trim();
+            // Regex patterns
+            const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]{3,}$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+(\.[^\s@]+)?$/;
+            const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+            const cepRegex = /^(\d{5}-\d{3}|\d{8})$/;
+            // Validation
+            if (!nameRegex.test(name)) {
+                alert("Nome inválido. Deve conter pelo menos 3 caracteres e apenas letras.");
+                return;
+            }
+            if (!emailRegex.test(email)) {
+                alert("E-mail inválido. Formato esperado: exemplo@dominio.com");
+                return;
+            }
+            if (!cnpjRegex.test(cnpj)) {
+                alert("CNPJ inválido. Formato esperado: XX.XXX.XXX/XXXX-XX");
+                return;
+            }
+            if (!cepRegex.test(cep)) {
+                alert("CEP inválido. Formato esperado: XXXXX-XXX");
+                return;
+            }
             const empresa = new Business(name, email, cnpj, country, state, cep, description);
-            empresa.waitedCompetences = empresaCompetencias; // Salvar competências
+            empresa.waitedCompetences = empresaCompetencias;
             businessManager.addBusiness(empresa);
             alert("Empresa cadastrada com sucesso!");
             empresaForm.reset();
-            empresaCompetencias = []; // Resetar array de competências
-            document.getElementById("competences-list").innerHTML = ""; // Limpar lista visual
+            empresaCompetencias = [];
+            document.getElementById("competences-list").innerHTML = "";
         });
     }
     if (candidatoForm) {
         candidatoForm.addEventListener("submit", (event) => {
             event.preventDefault();
-            const name = document.getElementById("name").value;
-            const email = document.getElementById("email").value;
-            const cpf = document.getElementById("cpf").value;
-            const age = document.getElementById("age").value;
-            const state = document.getElementById("state").value;
-            const cep = document.getElementById("cep").value;
-            const description = document.getElementById("description").value;
+            // Captura os valores dos inputs
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const cpf = document.getElementById("cpf").value.trim();
+            const age = document.getElementById("age").value.trim();
+            const state = document.getElementById("state").value.trim();
+            const cep = document.getElementById("cep").value.trim();
+            const description = document.getElementById("description").value.trim();
+            // Expressões regulares para validação
+            const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]{2,}$/; // Apenas letras e espaços, mínimo 2 caracteres
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Validação básica de e-mail
+            const cpfRegex = /^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/; // Formato 000.000.000-00
+            const ageRegex = /^(1[89]|[2-9]\d)$/; // Idade entre 18 e 99
+            const stateRegex = /^[A-Z]{2}$/; // Ex: SP, RJ, MG (duas letras maiúsculas)
+            const cepRegex = /^(\d{5}-\d{3}|\d{8})$/; // Formato 00000-000
+            // Validações
+            if (!nameRegex.test(name)) {
+                alert("Nome inválido! Deve conter apenas letras e espaços, com pelo menos 2 caracteres.");
+                return;
+            }
+            if (!emailRegex.test(email)) {
+                alert("E-mail inválido! Insira um formato válido (exemplo@dominio.com).");
+                return;
+            }
+            if (!cpfRegex.test(cpf)) {
+                alert("CPF inválido! Utilize o formato 000.000.000-00.");
+                return;
+            }
+            if (!ageRegex.test(age)) {
+                alert("Idade inválida! O candidato deve ter entre 18 e 99 anos.");
+                return;
+            }
+            if (!stateRegex.test(state)) {
+                alert("Estado inválido! Use a sigla com duas letras maiúsculas, ex: SP.");
+                return;
+            }
+            if (!cepRegex.test(cep)) {
+                alert("CEP inválido! Utilize o formato 00000-000.");
+                return;
+            }
+            // Criar o candidato após validações
             const candidato = new Candidate(name, email, state, cep, description, cpf, age);
-            candidato.competences = candidatoCompetencias; // Salvar competências
-            console.log(candidatoCompetencias);
+            candidato.competences = candidatoCompetencias;
             candidateManager.addCandidate(candidato);
             console.log("Candidato cadastrado:", candidato);
             alert("Candidato cadastrado com sucesso!");
+            // Resetar o formulário
             candidatoForm.reset();
-            candidatoCompetencias = []; // Resetar array de competências
-            document.getElementById("competences-list").innerHTML = ""; // Limpar lista visual
+            candidatoCompetencias = [];
+            document.getElementById("competences-list").innerHTML = "";
         });
     }
     const businessList = document.getElementById("empresas-list");
     const candidatesList = document.getElementById("candidatos-list");
     if (businessList) {
-        businessList.innerHTML = ""; // Limpar lista antes de recarregar
+        businessList.innerHTML = "";
         businessManager.listBusinesses().forEach(business => {
             const row = document.createElement("tr");
-            /**
-                <td>${business.email}</td>
-                <td>${business.CNPJ}</td>
-                <td>${business.cep}</td>
-                <td>${business.description}</td>
-             */
             row.innerHTML = `
             <td>${business.name}</td>                       
             <td>${business.country}</td>
@@ -75,17 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     if (candidatesList) {
-        candidatesList.innerHTML = ""; // Limpar lista antes de recarregar
+        candidatesList.innerHTML = "";
         candidateManager.listCandidates().forEach(candidate => {
             const row = document.createElement("tr");
-            /**
-                <td>${candidate.email}</td>
-                <td>${candidate.CPF}</td>
-                <td>${candidate.age}</td>
-                <td>${candidate.cep}</td>
-                <td>${candidate.description }</td>
-    
-             */
             row.innerHTML = `
                 <td>${candidate.name}</td>
                 <td>${candidate.state}</td>
@@ -96,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
         atualizarGraficoCompetencias(candidateManager.listCandidates());
     }
 });
-// Função para adicionar competências dinamicamente
 function setupCompetenceInput(formId, inputId, listId, storageArray) {
     const competenceInput = document.getElementById(inputId);
     const addCompetenceButton = document.getElementById(`add-${inputId}`);
@@ -133,8 +172,7 @@ function atualizarGraficoCompetencias(candidatos) {
     console.log("Atualizando gráfico com:", window.chartData);
     const scriptContainer = document.getElementById("script-container");
     if (scriptContainer) {
-        scriptContainer.innerHTML = ""; // Limpa scripts antigos
-        // Adiciona o script da biblioteca Chart.js
+        scriptContainer.innerHTML = "";
         const chartJsScript = document.createElement("script");
         chartJsScript.src = "https://cdn.jsdelivr.net/npm/chart.js";
         chartJsScript.onload = () => {
